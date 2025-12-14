@@ -64,6 +64,7 @@ LLM_MODEL | llama3 | The Ollama model to use (switchable to phi3).
 #### Example Output:
 Question: "What was Apple's total revenue for 2024?"
 Answer: Apple's total net sales for the fiscal year 2024 were $391.0 billion.Sources: ['Apple10-K, Page 32']
+
 Question: "Who won the 2024 Super Bowl?"
 Answer: This question cannot be answered based on the provided documents.Sources: []
 
