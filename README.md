@@ -33,6 +33,7 @@ The pipeline follows these steps:
 ├── financial_docs/          # Directory for PDF inputs (e.g., Apple-10K.pdf)
 ├── chroma_db_final/         # Persistent Vector Database (generated)
 ├── rag_with_sources.py      # Main application logic
+```
 
 Quick Start:
 Option 1: Google Colab / Kaggle (Recommended)
