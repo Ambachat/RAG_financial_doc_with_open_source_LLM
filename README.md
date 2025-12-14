@@ -35,10 +35,10 @@ The pipeline follows these steps:
 ├── rag_with_sources.py      # Main application logic
 ```
 
-Quick Start:
-Option 1: Google Colab / Kaggle (Recommended)
+## Quick Start:
+### Option 1: Google Colab / Kaggle (Recommended)
 This project is optimized to run in free cloud environments with GPU support.Open the notebook.Change Runtime to T4 GPU.Run the setup cells to install Ollama and LangChain.Execute the pipeline.
-Option 2: Local Installation
+### Option 2: Local Installation
 Prerequisites:Python 3.10+Ollama installed and running (ollama serve)
 1. Clone the Repository
 (Bash) git clone [https://github.com/Ambachat/RAG_financial_doc_with_open_source_LLM.git](https://github.com/yourusername/RAG_financial_doc_with_open_source_LLM.git)
@@ -51,7 +51,7 @@ pdfplumber sentence-transformers chromadb
 4. Run the Analyst
 (Bash) python financial_rag.py
 
-Configuration:
+#### Configuration:
 You can tweak the following constants in financial_rag.py to optimize performance:
 Parameter | Default | Description
 --- | --- | ---
@@ -60,13 +60,14 @@ CHUNK_OVERLAP | 200 | Overlap between chunks to preserve context.
 TOP_K | 5 | Number of documents to retrieve per query.
 LLM_MODEL | llama3 | The Ollama model to use (switchable to phi3).
 
-Example Output:
+#### Example Output:
 Question: "What was Apple's total revenue for 2024?"Answer: Apple's total net sales for the fiscal year 2024 were $391.0 billion.Sources: ['Apple10-K, Page 32']Question: "Who won the 2024 Super Bowl?"Answer: This question cannot be answered based on the provided documents.Sources: []
 
-Contributing:
+#### Contributing:
 Contributions are welcome! Please read designreport.md to understand the chunking strategy before submitting Pull Requests.
 
-License: This project is licensed under the MIT License.
+#### License: 
+This project is licensed under the MIT License.
 
 ├── designreport.md          # Detailed architectural decision record
 └── README.md                # This file
