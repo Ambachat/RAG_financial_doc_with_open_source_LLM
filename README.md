@@ -69,10 +69,10 @@ Question: "Who won the 2024 Super Bowl?"
 Answer: This question cannot be answered based on the provided documents.Sources: []
 
 #### Contributing:
-Contributions are welcome! Please read designreport.md to understand the chunking strategy before submitting Pull Requests.
+Contributions are welcome! Please read design_report.md to understand the chunking strategy before submitting Pull Requests.
 
 #### License: 
 This project is licensed under the MIT License.
 
-├── designreport.md          # Detailed architectural decision record
+├── design_report.md          # Detailed architectural decision record
 └── README.md                # This file
