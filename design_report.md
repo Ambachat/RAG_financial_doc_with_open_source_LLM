@@ -1,30 +1,36 @@
 Financial RAG System Design Report
-1. Executive Summary
-This report outlines the architecture of a Retrieval-Augmented Generation (RAG) system designed to answer factual questions from financial 10-K documents (Apple & Tesla). The system prioritizes high precision, strict citation tracking, and robust handling of tabular data.
-2. Ingestion & Chunking Strategy
-Effective chunking is critical for financial documents where context (like headers) often spans multiple paragraphs.
-•	Text Processing:
-o	Method: RecursiveCharacterTextSplitter
-o	Parameters: Chunk Size: 1000 characters, Overlap: 200 characters.
-o	Rationale: A larger chunk size of 1000 ensures that complete sentences and their immediate context are preserved. The 200-character overlap prevents information loss at the boundaries of splits, ensuring that references (e.g., "The company...") remain linked to their subjects.
-•	Table Processing (Critical Feature):
-o	Method: Tables are extracted whole using pdfplumber and converted to Markdown format.
-o	Rationale: Financial data relies on row-column alignment. Standard text splitters destroy this structure. By treating tables as standalone atomic chunks, we ensure the LLM receives the full financial context (Year vs. Revenue) without fragmentation.
-3. Retrieval Strategy
-A "Hybrid + Rerank" pipeline was chosen to balance semantic understanding with keyword precision.
-1.	Vector Search (ChromaDB): Captures semantic meaning (e.g., "earnings" ≈ "revenue").
-2.	Keyword Search (BM25): captures exact matches for unique identifiers (e.g., "6.07%", "September 28, 2024").
-3.	Re-ranking (Cross-Encoder): The top 10 results from both streams are fused and re-scored using ms-marco-MiniLM-L-6-v2. This ensures that the context fed to the LLM is highly relevant, reducing hallucinations.
-4. LLM Selection: Llama 3 vs. Phi-3
-The system was initially tested with Microsoft/Phi-3-mini but migrated to Meta/Llama-3.
-•	Phi-3-Mini (3.8B) Limitations: While efficient, Phi-3 struggled with the complex "negative constraint" instructions. It often attempted to answer out-of-scope questions or hallucinated page numbers despite explicit instructions not to. It also struggled to consistently format citations (e.g., [Ref: Source, Page]).
-•	Llama-3 (8B) Advantages: Llama-3 demonstrates significantly stronger instruction-following capabilities.
-o	Reasoning: It can better correlate data across complex Markdown tables.
-o	Compliance: It strictly adheres to negative constraints (refusing to answer when data is missing).
-o	Formatting: It reliably generates the regex-parseable citation format required for the source tracking feature.
-5. Out-of-Scope (OOS) Handling
-Preventing hallucinations is a strict requirement for financial analysis. OOS handling is implemented via a three-layer defence:
-1.	Prompt Engineering (Negative Constraints): The system prompt explicitly instructs the model: "If the answer is not in the text, respond EXACTLY: 'This question cannot be answered based on the provided documents.'"
-2.	Citation Validation: The post-processing logic parses the answer for [Ref: ...] tags. If the model provides an answer but fails to cite a source from the provided context, the answer is flagged or discarded (depending on configuration).
-3.	Source Filtering: The specific string "This question cannot be answered..." is hardcoded as a stop condition. If detected, the sources list is forcibly cleared to prevent misleading attributions.
 
+1. Executive Summary
+
+This report describes a Retrieval-Augmented Generation (RAG) system built to answer factual questions from financial 10-K documents, specifically for Apple and Tesla. The system is designed with a strong focus on accuracy, proper source citations, and reliable handling of financial tables.
+
+2. Ingestion and Chunking Strategy
+
+Proper chunking is very important for financial documents because important context often spans multiple paragraphs.
+
+For normal text,  a recursive text splitting approach is used . Each chunk is around 1000 characters long, with an overlap of 200 characters between chunks. This helps preserve full sentences and ensures that references like “the company” still make sense across chunk boundaries.
+
+Handling tables is treated as a critical requirement for financial docs since it contain important numerical values. Financial tables are extracted as a whole using pdfplumber and converted into Markdown format. Tables are never split into smaller chunks. This is done because financial meaning depends heavily on row and column alignment (for example, year versus revenue). Keeping tables intact ensures that the language model receives complete and accurate financial context.
+
+3. Retrieval Strategy
+
+The system uses a hybrid retrieval approach combined with re-ranking to ensure high-quality results.
+
+The documents are embedded using sentence-transformers/all-mpnet-base-v2 model  and  stored in chroma db.
+
+Vector search using ChromaDB captures semantic meaning, allowing the system to understand related concepts such as “earnings” and “revenue.” In parallel, keyword search using BM25 ensures exact matches for specific values like percentages or dates.
+
+The top results from both retrieval methods are combined and re-ranked using a cross-encoder model (ms-marco-MiniLM-L-6-v2). This step ensures that only the most relevant and precise information is passed to the language model, which significantly reduces hallucinations.
+
+4. LLM Selection:  Llama-3
+
+
+Llama-3 performs much better in these areas. It follows instructions more reliably, reasons more accurately over complex Markdown tables, and strictly respects negative constraints. It also consistently generates citations in a fixed, machine-readable format, which is essential for source tracking.
+
+It  also  provides good citation for the  answers.
+
+5. Out-of-Scope Question Handling
+
+Preventing hallucinations is a strict requirement for financial analysis. The system uses three layers of protection.
+
+First, the prompt clearly instructs the model to respond with a fixed sentence if the answer is not present in the documents. Second, the system validates citations in the final answer. If an answer is provided without valid references, it is flagged or discarded. Third, if the predefined out-of-scope response is detected, all sources are automatically removed to avoid misleading attribution.
